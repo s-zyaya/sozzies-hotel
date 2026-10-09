@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: hotel_postgres_container
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: hotel_user
+      POSTGRES_PASSWORD: hotel_password
+      POSTGRES_DB: hotel_management_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - hotel-network
+
+  hotel-app:
+    build: .
+    container_name: hotel_java_app
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/hotel_management_db
+      SPRING_DATASOURCE_USERNAME: hotel_user
+      SPRING_DATASOURCE_PASSWORD: hotel_password
+    depends_on:
+      - postgres-db
+    networks:
+      - hotel-network
+
+volumes:
+  postgres_data:
+
+networks:
+  hotel-network:
